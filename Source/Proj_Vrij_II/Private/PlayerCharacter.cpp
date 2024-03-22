@@ -1,7 +1,8 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "Proj_Vrij_II/Public/PlayerCharacter.h"
+#include "PlayerCharacter.h"
+#include "EnhancedInputComponent.h"
 
 // Sets default values
 APlayerCharacter::APlayerCharacter()
@@ -31,6 +32,33 @@ void APlayerCharacter::Tick(float DeltaTime)
 void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
+	
+	UEnhancedInputComponent* enhancedInputComponent = Cast<UEnhancedInputComponent>(PlayerInputComponent);
 
+	enhancedInputComponent->BindAction(moveAction, ETriggerEvent::Triggered, this, &APlayerCharacter::EnhancedInputMove);
+	enhancedInputComponent->BindAction(lookAction, ETriggerEvent::Triggered, this, &APlayerCharacter::EnhancedInputLook);
+}
+
+void APlayerCharacter::EnhancedInputMove(const FInputActionValue& Value)
+{
+	UE_LOG(LogTemp, Warning, TEXT("INPUTS"));
+	const FVector2d moveVector = Value.Get<FVector2d>();
+	const FRotator moveRotation(0.0f, Controller->GetControlRotation().Yaw, 0.0f);
+
+	if (moveVector.X > 0.05f || moveVector.X < -0.05f)
+	{
+		const FVector directionVector = moveRotation.RotateVector(FVector::RightVector);
+		AddMovementInput(directionVector, moveVector.X);
+	}
+
+	if (moveVector.Y > 0.05f || moveVector.Y < -0.05f)
+	{
+		const FVector directionVector = moveRotation.RotateVector(FVector::ForwardVector);
+		AddMovementInput(directionVector, moveVector.Y);
+	}
+}
+
+void APlayerCharacter::EnhancedInputLook(const FInputActionValue& Value)
+{
 }
 
